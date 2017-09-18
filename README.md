@@ -1,2 +1,3 @@
-# Team-Cyprus
-I hate this class
+#-Team-Cyprus
+
+this is the read me for our repo
