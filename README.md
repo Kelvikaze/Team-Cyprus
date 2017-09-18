@@ -1,4 +1,4 @@
 #-Team-Cyprus
 
-this is the read me for our repo
+This is the read me for our repo.
 
