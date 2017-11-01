@@ -13,6 +13,18 @@ namespace Database
     {
         internal static List<student> students = new List<student>();
 
+        internal static Dictionary<int, student> studentID = new Dictionary<int, student>();
+        internal static Dictionary<string, student> studentFirstName = new Dictionary<string, student>();
+        internal static Dictionary<string, student> studentLastName = new Dictionary<string, student>();
+        internal static Dictionary<int, student> studentCourseID = new Dictionary<int, student>();
+        internal static Dictionary<int, student> studentCourseNumber = new Dictionary<int, student>();
+        internal static Dictionary<string, student> studentCourseName = new Dictionary<string, student>();
+        internal static Dictionary<int, student> studentCredit = new Dictionary<int, student>();
+        internal static Dictionary<string, student> studentSemester = new Dictionary<string, student>();
+        internal static Dictionary<int, student> studentYear = new Dictionary<int, student>();
+        internal static Dictionary<string, student> studentCourseType = new Dictionary<string, student>();
+        internal static Dictionary<string, student> studentCourseGrade = new Dictionary<string, student>();
+
         static void Main(string[] args)
         {
             LoadStudents();
@@ -40,8 +52,27 @@ namespace Database
             Console.ReadLine();
         }
 
+        static void ClearCurrentEntries()
+        {
+            students.Clear();
+
+            studentID.Clear();
+            studentFirstName.Clear();
+            studentLastName.Clear();
+            studentCourseID.Clear();
+            studentCourseNumber.Clear();
+            studentCourseName.Clear();
+            studentCredit.Clear();
+            studentSemester.Clear();
+            studentYear.Clear();
+            studentCourseType.Clear();
+            studentCourseGrade.Clear();
+        }
+
         static void LoadStudents()
         {
+            ClearCurrentEntries();
+
             try
             {
                 using (Stream stream = File.Open("data.bin", FileMode.Open))
