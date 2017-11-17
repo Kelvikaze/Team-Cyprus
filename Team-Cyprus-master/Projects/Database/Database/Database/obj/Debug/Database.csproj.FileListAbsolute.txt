@@ -1,0 +1,7 @@
+C:\Users\tripl\Desktop\SENG 210\Team-Cyprus-master\Projects\Database\Database\Database\obj\Debug\Database.csprojResolveAssemblyReference.cache
+C:\Users\tripl\Desktop\SENG 210\Team-Cyprus-master\Projects\Database\Database\Database\obj\Debug\Database.csproj.CoreCompileInputs.cache
+C:\Users\tripl\Desktop\SENG 210\Team-Cyprus-master\Projects\Database\Database\Database\bin\Debug\Database.exe.config
+C:\Users\tripl\Desktop\SENG 210\Team-Cyprus-master\Projects\Database\Database\Database\bin\Debug\Database.exe
+C:\Users\tripl\Desktop\SENG 210\Team-Cyprus-master\Projects\Database\Database\Database\bin\Debug\Database.pdb
+C:\Users\tripl\Desktop\SENG 210\Team-Cyprus-master\Projects\Database\Database\Database\obj\Debug\Database.exe
+C:\Users\tripl\Desktop\SENG 210\Team-Cyprus-master\Projects\Database\Database\Database\obj\Debug\Database.pdb

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-
+using System.Text.RegularExpressions;
 
 namespace Database
 {
@@ -25,12 +25,17 @@ namespace Database
         internal static Dictionary<int, student> studentYear = new Dictionary<int, student>();
         internal static Dictionary<string, student> studentCourseType = new Dictionary<string, student>();
         internal static Dictionary<string, student> studentCourseGrade = new Dictionary<string, student>();
+        const int MaxLength = 30;// Creates a max form for the first and last name
 
+        /// <summary>
+        /// Main methond to run the program
+        /// </summary>
+        /// <param name="args"></param>
         static void Main(string[] args)
         {
             LoadStudents();
 
-            //newStudent();
+            newStudent();
 
             SearchFirstName(Console.ReadLine());
 
@@ -41,6 +46,10 @@ namespace Database
             Console.ReadLine();
         }
 
+        /// <summary>
+        /// searches the reconds by the first name of the student
+        /// </summary>
+        /// <param name="input">the input the the user wants to search by</param>
         static void SearchFirstName(string input)
         {
             List<student> output = new List<student>();
@@ -64,6 +73,10 @@ namespace Database
             }
         }
 
+        /// <summary>
+        /// searches the reconds by the last name of the student
+        /// </summary>
+        /// <param name="input">the input the the user wants to search by</param>
         static void SearchStudentsLastName(string input)//Searchs Students by last name
         {
             List<student> output = new List<student>();
@@ -88,7 +101,12 @@ namespace Database
             }
         }
 
-        static void SearchCourseName(string input)//Search students by courses taken
+        /// <summary>
+        /// Search students by courses taken by course name from the reconds entered
+        /// </summary>
+        /// <param name="input">the input the the user wants to search by</param>
+        
+        static void SearchCourseName(string input)
         {
             List<student> output = new List<student>();
 
@@ -96,7 +114,7 @@ namespace Database
             {
                 if (item.ToLower().Contains(input))
                 {
-                    output.Add(studentCourseName.[item]);
+                    output.Add(studentCourseName[item]);
                 }
             }
 
@@ -111,17 +129,33 @@ namespace Database
             }
         }
 
-
+        /// <summary>
+        /// creates new student records 
+        /// </summary>
         static void newStudent()
         {
-            Console.WriteLine("Input the desired student ID");
+            Console.WriteLine("Input the desired student ID: ");
             NewStudent.ID = Convert.ToInt32(Console.ReadLine());
+
+            //Regex reg = new Regex(@"^\(\d[1-9]\) \d[1-9]-\d[1-9]( ext \d[1-9])[1-9])[1-9]$");//Reg for student id
+            
+
             Console.Clear();
-            Console.WriteLine("Input the desired student first name");
+            Console.WriteLine("Input the desired student first name: ");
             NewStudent.FirstName = Console.ReadLine();
+            if (NewStudent.FirstName.Length > MaxLength)//limits the number of letters in the first name
+            {
+                Console.Write("Invald First Name");
+                Console.Clear();
+            }
             Console.Clear();
-            Console.WriteLine("Input the desired student last name");
+            Console.WriteLine("Input the desired student last name: ");
             NewStudent.LastName = Console.ReadLine();
+            if (NewStudent.LastName.Length > MaxLength)//Limits the number of letters in the last name
+            {
+                Console.Write("Invald Last Name");
+                Console.Clear();
+            }
             Console.Clear();
             Console.WriteLine("Input the desired course ID");
             NewStudent.CourseID = Convert.ToInt32(Console.ReadLine());
@@ -150,22 +184,24 @@ namespace Database
             students.Add(NewStudent);
             Console.Clear();
             Console.WriteLine("Added New Student:");
-            Console.WriteLine(NewStudent.ID);
-            Console.WriteLine(NewStudent.FirstName);
-            Console.WriteLine(NewStudent.LastName);
-            Console.WriteLine(NewStudent.CourseID);
-            Console.WriteLine(NewStudent.CourseNumber);
-            Console.WriteLine(NewStudent.CourseName);
-            Console.WriteLine(NewStudent.Credit);
-            Console.WriteLine(NewStudent.Semester);
-            Console.WriteLine(NewStudent.Year);
-            Console.WriteLine(NewStudent.CourseType);
-            Console.WriteLine(NewStudent.CourseGrade);
+            Console.WriteLine("Student Identification Number: " + NewStudent.ID);
+            Console.WriteLine("First Name: "+ NewStudent.FirstName);
+            Console.WriteLine("Last Name: "+ NewStudent.LastName);
+            Console.WriteLine("Course Identification: " + NewStudent.CourseID);
+            Console.WriteLine("Course Identification Number: "+ NewStudent.CourseNumber);
+            Console.WriteLine("Course Name: "+ NewStudent.CourseName);
+            Console.WriteLine("Credit Total: "+ NewStudent.Credit);
+            Console.WriteLine("Semester: " + NewStudent.Semester);
+            Console.WriteLine("Year: "+ NewStudent.Year);
+            Console.WriteLine("Course Type: "+ NewStudent.CourseType);
+            Console.WriteLine("Course Grade: "+ NewStudent.CourseGrade);
 
             Console.ReadKey();
             Console.Clear();
         }
-
+        /// <summary>
+        /// clears the entries from the arrays 
+        /// </summary>
         static void ClearCurrentEntries()
         {
             students.Clear();
@@ -183,6 +219,9 @@ namespace Database
             studentCourseGrade.Clear();
         }
 
+        /// <summary>
+        /// Loads students infomation from the arrays that the users inputs
+        /// </summary>
         static void LoadStudents()
         {
             ClearCurrentEntries();
@@ -227,6 +266,9 @@ namespace Database
             }
         }
 
+        /// <summary>
+        /// Saves the student infomation to a document inside a data file
+        /// </summary>
         static void SaveStudents()
         {
             try
@@ -242,7 +284,8 @@ namespace Database
                 Console.WriteLine("Error writing file");
             }
         }
-       
+        
+
         [Serializable]
         internal class student
         {
@@ -260,3 +303,4 @@ namespace Database
         }
     }
 }
+
