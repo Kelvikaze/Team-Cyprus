@@ -79,10 +79,11 @@ namespace Database
         static void SearchDatabase()
         {
             Console.Clear();
-            
-            switch (GetInt("How would you like to search the database?\nSubmit the number corresponding to how you would like to search\n0 - Student ID\n1 - Student First Name\n2 - Student Last Name\n3 - Course Numbers\n4 - Return to Main Menu")) {
+
+            switch (GetInt("How would you like to search the database?\nSubmit the number corresponding to how you would like to search\n0 - Student ID\n1 - Student First Name\n2 - Student Last Name\n3 - Return to Main Menu")) {
                 case 0:
-                    // Do Student ID search
+                    searching = true;
+                    Search(0);
                     break;
                 case 1:
                     searching = true;
@@ -93,9 +94,6 @@ namespace Database
                     Search(2);
                     break;
                 case 3:
-                    // Course ID
-                    break;
-                case 4:
                     MainMenu();
                     break;
                 default:
@@ -115,6 +113,7 @@ namespace Database
                 switch (searchMode)
                 {
                     case 0:
+                        SearchID();
                         break;
                     case 1:
                         SearchFirstName(GetString("Enter search terms"));
@@ -122,13 +121,11 @@ namespace Database
                     case 2:
                         SearchStudentsLastName(GetString("Enter search terms"));
                         break;
-                    case 3:
-                        break;
                 }
 
                 if (PromptBool("Continue searching?"))
                 {
-                    
+
                 }
                 else
                 {
@@ -136,12 +133,42 @@ namespace Database
                 }
             }
 
-            if (!PromptBool("Would you like to change search method instead?"))
+            if (!PromptBool("\nWould you like to change search method instead?"))
             {
                 Environment.Exit(1);
             }
             else
                 SearchDatabase();
+        }
+
+        static void SearchID()
+        {
+            Console.Clear();
+            List<student> output = new List<student>();
+            int input = GetInt("Enter search criteria");
+            foreach (var item in studentID.Keys)
+            {
+                if (item.ToString().Contains(input.ToString()))
+                {
+                    output.Add(studentID[item]);
+                }
+            }
+
+            if (output.Count > 0)
+            {
+                Console.WriteLine("Found " + output.Count + " student(s) with matching criteria\n[First name, Last name, Student ID]");
+
+                foreach (var item in output)
+                {
+                    Console.WriteLine(item.FirstName + " " + item.LastName + " | " + GetID(item.ID));
+                }
+            }
+            else
+            {
+                Console.WriteLine("No students found with matching criteria");
+            }
+            System.Threading.Thread.Sleep(1000);
+            WantDetails();
         }
 
         static bool PromptBool(string question)
@@ -160,7 +187,7 @@ namespace Database
                 return true;
             }
             else
-            return true;
+                return true;
         }
 
         /// <summary>
@@ -193,9 +220,43 @@ namespace Database
                 Console.WriteLine("No students found with matching criteria");
             }
             System.Threading.Thread.Sleep(1000);
-            Console.WriteLine("Press any key to continue...");
-            Console.ReadKey();
+            WantDetails();
+        }
+
+        static void WantDetails()
+        {
+            Console.WriteLine("");
+            if (PromptBool("Would you like details on any of the students?"))
+            {
+                GetDetails(GetInt("Submit student ID for desired student"));
+            }
+            else
+                Console.Clear();
+        }
+
+        static void GetDetails(int ID)
+        {
             Console.Clear();
+            student Selected = new student();
+            if (studentID.TryGetValue(ID, out Selected))
+            {
+                Console.WriteLine(Selected.ID + " | " + Selected.FirstName + " " + Selected.LastName);
+
+                Console.WriteLine("Classes:\n");
+                foreach (var clss in Selected.Classes)
+                {
+                    Console.WriteLine("Course ID: \t" + clss.CourseID);
+                    Console.WriteLine("Course Number: \t" + clss.CourseNumber);
+                    Console.WriteLine("Course Name: \t" + clss.CourseName);
+                    Console.WriteLine("Course Credits: " + clss.Credit);
+                    Console.WriteLine("Course Semester:" + clss.Semester);
+                    Console.WriteLine("Course Year: \t" + clss.Year);
+                    Console.WriteLine("Course Type: \t" + clss.CourseType);
+                    Console.WriteLine("Course Grade: \t" + clss.CourseGrade + "\n");
+                }
+            }
+            else
+                Console.WriteLine("That wasn't a valid student ID\n");
         }
 
         /// <summary>
@@ -229,17 +290,15 @@ namespace Database
                 Console.WriteLine("No students found with matching criteria");
             }
             System.Threading.Thread.Sleep(1000);
-            Console.WriteLine("Press any key to continue...");
-            Console.ReadKey();
-            Console.Clear();
+            WantDetails();
         }
 
+        #region "Get" Helpers
         static Int32 GetInt(string prompt)
         {
             bool metCriteria = false;
             while (!metCriteria)
             {
-                Console.Clear();
                 Console.WriteLine(prompt);
                 int output;
                 string input = Console.ReadLine();
@@ -252,8 +311,11 @@ namespace Database
                     if (input.Length > MaxLength)
                         Console.WriteLine("Input was too large, please stay under " + MaxLength + " digits");
                     else
+                    {
                         Console.WriteLine("Please input the correct data type");
+                    }
                     System.Threading.Thread.Sleep(1500);
+                    Console.Clear();
                 }
             }
             return 0;
@@ -299,6 +361,7 @@ namespace Database
             newID = numList[0] + "-" + numList[1] + numList[2] + "-" + numList[3] + numList[4] + numList[5];
             return newID;
         }
+        #endregion
 
         #region New Student
         /// <summary>
