@@ -11,6 +11,7 @@ namespace Database
 {
     class Program
     {
+        internal static bool noStudents;
         internal static bool searching;
         internal static List<student> students = new List<student>();
         internal static List<classes> studentClasses = new List<classes>();
@@ -19,7 +20,7 @@ namespace Database
         internal static Dictionary<string, student> studentLastName = new Dictionary<string, student>();
         internal static Dictionary<string, student> classNumbers = new Dictionary<string, student>();
         const int MaxLength = 20;// Creates a max form for the first and last name
-
+        
         /// <summary>
         /// Main methond to run the program
         /// </summary>
@@ -43,18 +44,7 @@ namespace Database
         /// </summary>
         static void MainMenu()
         {
-            Console.Clear();
-            Console.WriteLine(".-.   .-.  .--.  .-..-. .-.   .-.   .-..----..-. .-..-. .-.");
-            Console.WriteLine("|  `.'  | / {} \\ | ||  `| |   |  `.'  || {_  |  `| || { } |");
-            Console.WriteLine("| |\\ /| |/  /\\  \\| || |\\  |   | |\\ /| || {__ | |\\  || {_} |");
-            Console.WriteLine("`-' ` `-'`-'  `-'`-'`-' `-'   `-' ` `-'`----'`-' `-'`-----'");
-            Console.WriteLine("");
-
-            if (PromptBool("Would you like to search the student database?"))
-            {
-                SearchDatabase();
-            }
-            else
+            while (true)
             {
                 Console.Clear();
                 Console.WriteLine(".-.   .-.  .--.  .-..-. .-.   .-.   .-..----..-. .-..-. .-.");
@@ -62,14 +52,39 @@ namespace Database
                 Console.WriteLine("| |\\ /| |/  /\\  \\| || |\\  |   | |\\ /| || {__ | |\\  || {_} |");
                 Console.WriteLine("`-' ` `-'`-'  `-'`-'`-' `-'   `-' ` `-'`----'`-' `-'`-----'");
                 Console.WriteLine("");
-                if (!PromptBool("Would you like to add an entry instead?"))
+                if (!noStudents)
                 {
-                    Environment.Exit(1);
+                    if (PromptBool("Would you like to search the student database?"))
+                    {
+                        SearchDatabase();
+                    }
+                    else
+                        NewStudentPrompt("Would you like to add an entry instead?");
                 }
                 else
                 {
-                    newStudent();
+                    NewStudentPrompt("No students were found. Would you like to add one?");
                 }
+            }
+        }
+
+        static void NewStudentPrompt(string prompt)
+        {
+            Console.Clear();
+            Console.WriteLine(".-.   .-.  .--.  .-..-. .-.   .-.   .-..----..-. .-..-. .-.");
+            Console.WriteLine("|  `.'  | / {} \\ | ||  `| |   |  `.'  || {_  |  `| || { } |");
+            Console.WriteLine("| |\\ /| |/  /\\  \\| || |\\  |   | |\\ /| || {__ | |\\  || {_} |");
+            Console.WriteLine("`-' ` `-'`-'  `-'`-'`-' `-'   `-' ` `-'`----'`-' `-'`-----'");
+            Console.WriteLine("");
+
+
+            if (!PromptBool(prompt))
+            {
+                Environment.Exit(1);
+            }
+            else
+            {
+                newStudent();
             }
         }
 
@@ -125,17 +140,17 @@ namespace Database
 
                 if (PromptBool("Continue searching?"))
                 {
-
+                    // Keep looping
                 }
                 else
-                {
+                { 
+                    // Break loop
                     searching = false;
                 }
             }
 
             if (!PromptBool("\nWould you like to change search method instead?"))
             {
-                Environment.Exit(1);
             }
             else
                 SearchDatabase();
@@ -148,7 +163,7 @@ namespace Database
             int input = GetInt("Enter search criteria");
             foreach (var item in studentID.Keys)
             {
-                if (item.ToString().Contains(input.ToString()))
+                if (item.ToString().Contains(input.ToString()) || LevenshteinDistance.Compute(item.ToString(), input.ToString()) < 3)
                 {
                     output.Add(studentID[item]);
                 }
@@ -200,7 +215,7 @@ namespace Database
 
             foreach (var item in studentFirstName.Keys)
             {
-                if (item.ToLower().Contains(input.ToLower()))
+                if (item.ToLower().Contains(input.ToLower()) || LevenshteinDistance.Compute(item.ToLower(), input.ToLower()) < 3)
                 {
                     output.Add(studentFirstName[item]);
                 }
@@ -234,31 +249,6 @@ namespace Database
                 Console.Clear();
         }
 
-        static void GetDetails(int ID)
-        {
-            Console.Clear();
-            student Selected = new student();
-            if (studentID.TryGetValue(ID, out Selected))
-            {
-                Console.WriteLine(Selected.ID + " | " + Selected.FirstName + " " + Selected.LastName);
-
-                Console.WriteLine("Classes:\n");
-                foreach (var clss in Selected.Classes)
-                {
-                    Console.WriteLine("Course ID: \t" + clss.CourseID);
-                    Console.WriteLine("Course Number: \t" + clss.CourseNumber);
-                    Console.WriteLine("Course Name: \t" + clss.CourseName);
-                    Console.WriteLine("Course Credits: " + clss.Credit);
-                    Console.WriteLine("Course Semester:" + clss.Semester);
-                    Console.WriteLine("Course Year: \t" + clss.Year);
-                    Console.WriteLine("Course Type: \t" + clss.CourseType);
-                    Console.WriteLine("Course Grade: \t" + clss.CourseGrade + "\n");
-                }
-            }
-            else
-                Console.WriteLine("That wasn't a valid student ID\n");
-        }
-
         /// <summary>
         /// searches the reconds by the last name of the student
         /// </summary>
@@ -270,7 +260,7 @@ namespace Database
             foreach (var item in studentLastName.Keys)
             {
                 Console.WriteLine(item);
-                if (item.ToLower().Contains(input.ToLower()))
+                if (item.ToLower().Contains(input.ToLower()) || LevenshteinDistance.Compute(item.ToLower(), input.ToLower()) < 3)
                 {
                     output.Add(studentLastName[item]);
                 }
@@ -361,6 +351,31 @@ namespace Database
             newID = numList[0] + "-" + numList[1] + numList[2] + "-" + numList[3] + numList[4] + numList[5];
             return newID;
         }
+
+        static void GetDetails(int ID)
+        {
+            Console.Clear();
+            student Selected = new student();
+            if (studentID.TryGetValue(ID, out Selected))
+            {
+                Console.WriteLine(Selected.ID + " | " + Selected.FirstName + " " + Selected.LastName);
+
+                Console.WriteLine("Classes:\n");
+                foreach (var clss in Selected.Classes)
+                {
+                    Console.WriteLine("Course ID: \t" + clss.CourseID);
+                    Console.WriteLine("Course Number: \t" + clss.CourseNumber);
+                    Console.WriteLine("Course Name: \t" + clss.CourseName);
+                    Console.WriteLine("Course Credits: " + clss.Credit);
+                    Console.WriteLine("Course Semester:" + clss.Semester);
+                    Console.WriteLine("Course Year: \t" + clss.Year);
+                    Console.WriteLine("Course Type: \t" + clss.CourseType);
+                    Console.WriteLine("Course Grade: \t" + clss.CourseGrade + "\n");
+                }
+            }
+            else
+                Console.WriteLine("That wasn't a valid student ID\n");
+        }
         #endregion
 
         #region New Student
@@ -371,33 +386,33 @@ namespace Database
         {
             student NewStudent = new student();
 
-            NewStudent.ID = GetInt("Input the desired student ID: (######)");           
+            NewStudent.ID = GetInt("Please input the desired student ID: (######)");           
 
             Console.Clear();
 
-            NewStudent.FirstName = GetString("Input the desired student first name: (ABCDXYZ)");
+            NewStudent.FirstName = GetString("Please input the desired student first name: (ABCDXYZ)");
 
             Console.Clear();
 
-            NewStudent.LastName = GetString("Input the desired student last name: (ABCDXYZ)");
+            NewStudent.LastName = GetString("Please input the desired student last name: (ABCDXYZ)");
 
             Console.Clear();
 
-            int classesNum = GetInt("How many classes is the student in? (#)");
+            int classesNum = GetInt("How many classes is/was the student in? (#)");
 
             List<classes> newClassList = new List<classes>();
 
             for (int i = 0; i < classesNum; i++)
             {
                 classes newClass = new classes();
-                newClass.CourseID = GetInt("Input course ID: (####)");
-                newClass.CourseNumber = GetString("Input course number: (ABCD####");
-                newClass.CourseName = GetString("Input course name: (ABCXYZ)");
-                newClass.Credit = GetInt("Input course credit amount: (#)");
-                newClass.Semester = GetString("Input course semester: (ABCXYZ)");
-                newClass.Year = GetInt("Input course year: (####)");
-                newClass.CourseType = GetString("Input course type: (ABCXYZ)");
-                newClass.CourseGrade = GetString("Input course grade:");
+                newClass.CourseID = GetInt("Please input course ID: (####)");
+                newClass.CourseNumber = GetString("Please input course number: (ABCD####");
+                newClass.CourseName = GetString("Please input course name: (ABCXYZ)");
+                newClass.Credit = GetInt("Please input course credit amount: (#)");
+                newClass.Semester = GetString("Please input course semester: (ABCXYZ)");
+                newClass.Year = GetInt("Please input course year: (####)");
+                newClass.CourseType = GetString("Please input course type: (ABCXYZ)");
+                newClass.CourseGrade = GetString("Please input course grade:");
                 newClassList.Add(newClass);
             }
 
@@ -443,15 +458,18 @@ namespace Database
         {
             ClearCurrentEntries();
             Console.Clear();
+
+            string dir = @"c:\temp";
+            string serializationFile = Path.Combine(dir, "students.bin");
             try
             {
-                using (Stream stream = File.Open(Directory.GetCurrentDirectory() + "data.bin", FileMode.Open))
+                using (Stream stream = File.Open(serializationFile, FileMode.Open))
                 {
-                    BinaryFormatter bin = new BinaryFormatter();
+                    var bformatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
 
-                    var students2 = (List<student>)bin.Deserialize(stream);
+                    var students2 = (List<student>)bformatter.Deserialize(stream);
                     foreach (student boi in students2)
-                    {                        
+                    {
                         Console.WriteLine(boi.ID);
                         studentID.Add(boi.ID, boi);
                         Console.WriteLine(boi.FirstName);
@@ -464,10 +482,11 @@ namespace Database
                         }
                     }
                 }
+                noStudents = false;
             }
             catch (IOException)
             {
-                // The file might not be created yet
+                noStudents = true;
             }
         }
         #endregion
@@ -478,18 +497,18 @@ namespace Database
         /// </summary>
         static void SaveStudents()
         {
-            try
+            string dir = @"c:\temp";
+            string serializationFile = Path.Combine(dir, "students.bin");
+
+            //serialize
+            using (Stream stream = File.Open(serializationFile, FileMode.Create))
             {
-                using (Stream stream = File.Open(Directory.GetCurrentDirectory() + "data.bin", FileMode.Create))
-                {
-                    BinaryFormatter bin = new BinaryFormatter();
-                    bin.Serialize(stream, students);
-                }
+                var bformatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+
+                bformatter.Serialize(stream, students);
             }
-            catch (IOException)
-            {
-                Console.WriteLine("Error writing file");
-            }
+
+            LoadStudents();
         }
         #endregion
 
@@ -554,6 +573,57 @@ namespace Database
             public string FirstName = null;
             public string LastName = null;
             public List<classes> Classes = null;
+        }
+    }
+
+    static class LevenshteinDistance
+    {
+        /// <summary>
+        /// Compute the distance between two strings.
+        /// </summary>
+        public static int Compute(string s, string t)
+        {
+            int n = s.Length;
+            int m = t.Length;
+            int[,] d = new int[n + 1, m + 1];
+
+            // Step 1
+            if (n == 0)
+            {
+                return m;
+            }
+
+            if (m == 0)
+            {
+                return n;
+            }
+
+            // Step 2
+            for (int i = 0; i <= n; d[i, 0] = i++)
+            {
+            }
+
+            for (int j = 0; j <= m; d[0, j] = j++)
+            {
+            }
+
+            // Step 3
+            for (int i = 1; i <= n; i++)
+            {
+                //Step 4
+                for (int j = 1; j <= m; j++)
+                {
+                    // Step 5
+                    int cost = (t[j - 1] == s[i - 1]) ? 0 : 1;
+
+                    // Step 6
+                    d[i, j] = Math.Min(
+                        Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
+                        d[i - 1, j - 1] + cost);
+                }
+            }
+            // Step 7
+            return d[n, m];
         }
     }
 }
