@@ -1,12 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text.RegularExpressions;
 
 namespace Database
 {
     class Program
     {
+        internal static bool noStudents;
         internal static bool searching;
         internal static List<student> students = new List<student>();
         internal static List<classes> studentClasses = new List<classes>();
@@ -39,18 +44,7 @@ namespace Database
         /// </summary>
         static void MainMenu()
         {
-            Console.Clear();
-            Console.WriteLine(".-.   .-.  .--.  .-..-. .-.   .-.   .-..----..-. .-..-. .-.");
-            Console.WriteLine("|  `.'  | / {} \\ | ||  `| |   |  `.'  || {_  |  `| || { } |");
-            Console.WriteLine("| |\\ /| |/  /\\  \\| || |\\  |   | |\\ /| || {__ | |\\  || {_} |");
-            Console.WriteLine("`-' ` `-'`-'  `-'`-'`-' `-'   `-' ` `-'`----'`-' `-'`-----'");
-            Console.WriteLine("");
-
-            if (PromptBool("Would you like to search the student database?"))
-            {
-                SearchDatabase();
-            }
-            else
+            while (true)
             {
                 Console.Clear();
                 Console.WriteLine(".-.   .-.  .--.  .-..-. .-.   .-.   .-..----..-. .-..-. .-.");
@@ -58,18 +52,42 @@ namespace Database
                 Console.WriteLine("| |\\ /| |/  /\\  \\| || |\\  |   | |\\ /| || {__ | |\\  || {_} |");
                 Console.WriteLine("`-' ` `-'`-'  `-'`-'`-' `-'   `-' ` `-'`----'`-' `-'`-----'");
                 Console.WriteLine("");
-                if (!PromptBool("Would you like to add an entry instead?"))
+                if (!noStudents)
                 {
-                    Environment.Exit(1);
+                    if (PromptBool("Would you like to search the student database?"))
+                    {
+                        SearchDatabase();
+                    }
+                    else
+                        NewStudentPrompt("Would you like to add an entry instead?");
                 }
                 else
                 {
-                    newStudent();
+                    NewStudentPrompt("No students were found. Would you like to add one?");
                 }
             }
         }
 
-        #region Searching
+        static void NewStudentPrompt(string prompt)
+        {
+            Console.Clear();
+            Console.WriteLine(".-.   .-.  .--.  .-..-. .-.   .-.   .-..----..-. .-..-. .-.");
+            Console.WriteLine("|  `.'  | / {} \\ | ||  `| |   |  `.'  || {_  |  `| || { } |");
+            Console.WriteLine("| |\\ /| |/  /\\  \\| || |\\  |   | |\\ /| || {__ | |\\  || {_} |");
+            Console.WriteLine("`-' ` `-'`-'  `-'`-'`-' `-'   `-' ` `-'`----'`-' `-'`-----'");
+            Console.WriteLine("");
+
+
+            if (!PromptBool(prompt))
+            {
+                Environment.Exit(1);
+            }
+            else
+            {
+                newStudent();
+            }
+        }
+
         /// <summary>
         /// Determines which method of searching the user would like to use
         /// </summary>
@@ -77,8 +95,7 @@ namespace Database
         {
             Console.Clear();
 
-            switch (GetInt("How would you like to search the database?\nSubmit the number corresponding to how you would like to search\n0 - Student ID\n1 - Student First Name\n2 - Student Last Name\n3 - Return to Main Menu"))
-            {
+            switch (GetInt("How would you like to search the database?\nSubmit the number corresponding to how you would like to search\n0 - Student ID\n1 - Student First Name\n2 - Student Last Name\n3 - Return to Main Menu")) {
                 case 0:
                     searching = true;
                     Search(0);
@@ -103,16 +120,12 @@ namespace Database
             }
         }
 
-        /// <summary>
-        /// Launches correct search system based on the given search code
-        /// </summary>
-        /// <param name="searchCode"></param>
-        static void Search(int searchCode)
+        static void Search(int searchMode)
         {
             while (searching)
             {
                 Console.Clear();
-                switch (searchCode)
+                switch (searchMode)
                 {
                     case 0:
                         SearchID();
@@ -130,7 +143,7 @@ namespace Database
                     // Keep looping
                 }
                 else
-                {
+                { 
                     // Break loop
                     searching = false;
                 }
@@ -138,15 +151,11 @@ namespace Database
 
             if (!PromptBool("\nWould you like to change search method instead?"))
             {
-                Environment.Exit(1);
             }
             else
                 SearchDatabase();
         }
 
-        /// <summary>
-        /// Search student database by ID
-        /// </summary>
         static void SearchID()
         {
             Console.Clear();
@@ -175,6 +184,25 @@ namespace Database
             }
             System.Threading.Thread.Sleep(1000);
             WantDetails();
+        }
+
+        static bool PromptBool(string question)
+        {
+            Console.WriteLine(question);
+            Console.WriteLine("Submit 'y' to continue or 'n' to return");
+            string input = Console.ReadLine().ToLower();
+            if (input == "n")
+            {
+                return false;
+            }
+            else if (input != "y")
+            {
+                Console.WriteLine("You did not answer with an accepted answer so I'll take that as a yes");
+                System.Threading.Thread.Sleep(2000);
+                return true;
+            }
+            else
+                return true;
         }
 
         /// <summary>
@@ -210,6 +238,17 @@ namespace Database
             WantDetails();
         }
 
+        static void WantDetails()
+        {
+            Console.WriteLine("");
+            if (PromptBool("Would you like details on any of the students?"))
+            {
+                GetDetails(GetInt("Submit student ID for desired student"));
+            }
+            else
+                Console.Clear();
+        }
+
         /// <summary>
         /// searches the reconds by the last name of the student
         /// </summary>
@@ -243,47 +282,6 @@ namespace Database
             System.Threading.Thread.Sleep(1000);
             WantDetails();
         }
-        #endregion
-
-        #region Prompts
-        /// <summary>
-        /// Prompt the user with the provided question and return if they would like to do it or not
-        /// </summary>
-        /// <param name="question"></param>
-        /// <returns></returns>
-        static bool PromptBool(string question)
-        {
-            Console.WriteLine(question);
-            Console.WriteLine("Submit 'y' to continue or 'n' to return");
-            string input = Console.ReadLine().ToLower();
-            if (input == "n")
-            {
-                return false;
-            }
-            else if (input != "y")
-            {
-                Console.WriteLine("You did not answer with an accepted answer so I'll take that as a yes");
-                System.Threading.Thread.Sleep(2000);
-                return true;
-            }
-            else
-                return true;
-        }
-
-        /// <summary>
-        /// Propmt the user if they would like details on any of the students
-        /// </summary>
-        static void WantDetails()
-        {
-            Console.WriteLine("");
-            if (PromptBool("Would you like details on any of the students?"))
-            {
-                GetDetails(GetInt("Submit student ID for desired student"));
-            }
-            else
-                Console.Clear();
-        }
-        #endregion
 
         #region "Get" Helpers
         static Int32 GetInt(string prompt)
@@ -460,15 +458,18 @@ namespace Database
         {
             ClearCurrentEntries();
             Console.Clear();
+
+            string dir = @"c:\temp";
+            string serializationFile = Path.Combine(dir, "students.bin");
             try
             {
-                using (Stream stream = File.Open(Directory.GetCurrentDirectory() + "data.bin", FileMode.Open))
+                using (Stream stream = File.Open(serializationFile, FileMode.Open))
                 {
-                    BinaryFormatter bin = new BinaryFormatter();
+                    var bformatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
 
-                    var students2 = (List<student>)bin.Deserialize(stream);
+                    var students2 = (List<student>)bformatter.Deserialize(stream);
                     foreach (student boi in students2)
-                    {                        
+                    {
                         Console.WriteLine(boi.ID);
                         studentID.Add(boi.ID, boi);
                         Console.WriteLine(boi.FirstName);
@@ -481,10 +482,11 @@ namespace Database
                         }
                     }
                 }
+                noStudents = false;
             }
             catch (IOException)
             {
-                // The file might not be created yet
+                noStudents = true;
             }
         }
         #endregion
@@ -495,18 +497,18 @@ namespace Database
         /// </summary>
         static void SaveStudents()
         {
-            try
+            string dir = @"c:\temp";
+            string serializationFile = Path.Combine(dir, "students.bin");
+
+            //serialize
+            using (Stream stream = File.Open(serializationFile, FileMode.Create))
             {
-                using (Stream stream = File.Open(Directory.GetCurrentDirectory() + "data.bin", FileMode.Create))
-                {
-                    BinaryFormatter bin = new BinaryFormatter();
-                    bin.Serialize(stream, students);
-                }
+                var bformatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+
+                bformatter.Serialize(stream, students);
             }
-            catch (IOException)
-            {
-                Console.WriteLine("Error writing file");
-            }
+
+            LoadStudents();
         }
         #endregion
 
